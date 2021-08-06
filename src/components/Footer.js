@@ -2,11 +2,12 @@ import { Link } from "react-router-dom";
 
 import styled from "styled-components";
 
-export default function Header({ currentPage }) {
+export default function Footer({ currentPage }) {
     return (
         <Container>
             <Link to="/" className={currentPage === 'list' ? 'active' : ''}>Pokédex</Link>
             <Link to="/my-pokemons" className={currentPage === 'my-pokemons' ? 'active' : ''}>My Pokémons</Link>
+            <Link to="/chat" className={currentPage === 'chat' ? 'active' : ''}>Chat</Link>
         </Container>
     );
 }

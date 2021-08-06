@@ -14,6 +14,7 @@ import SignUp from "./pages/SignUp";
 import PokemonList from "./pages/PokemonList";
 import Pokemon from "./pages/Pokemon";
 import MyPokemons from "./pages/MyPokemons";
+import Chat from "./pages/Chat";
 
 export default function App() {
     return (
@@ -41,6 +42,10 @@ export default function App() {
                             <ProtectedRoute path="/my-pokemons" exact>
                                 <MyPokemons />
                             </ProtectedRoute>
+
+                            <ProtectedRoute path="/chat" exact>
+                                <Chat />
+                            </ProtectedRoute>
                         </Switch>
                     </Router>
                 </PokemonsProvider>
@@ -49,9 +54,9 @@ export default function App() {
     );
 }
 
-function ProtectedRoute({ redirect="/login", ...props }) {
+function ProtectedRoute({ redirect = "/login", ...props }) {
     const { token } = useContext(UserContext);
-    
+
     if (!token) {
         return (
             <Redirect to={redirect} />
@@ -63,9 +68,9 @@ function ProtectedRoute({ redirect="/login", ...props }) {
     );
 }
 
-function UnprotectedRoute({ redirect="/", ...props }) {
+function UnprotectedRoute({ redirect = "/", ...props }) {
     const { token } = useContext(UserContext);
-    
+
     if (token) {
         return (
             <Redirect to={redirect} />
