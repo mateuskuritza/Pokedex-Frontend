@@ -6,10 +6,16 @@ import ChatMessage from "../components/ChatMessage";
 import { useContext, useEffect, useState } from "react";
 import UserContext from "../contexts/UserContext";
 import axios from "axios";
+const io = require("socket.io-client");
+const socket = io(process.env.REACT_APP_API_BASE_URL, {
+    withCredentials: false,
+    extraHeaders: {
+        "my-allowed": true
+    }
+});
 
 
 export default function Chat() {
-
     const { token } = useContext(UserContext);
 
     const [messages, setMessages] = useState([]);
@@ -22,13 +28,15 @@ export default function Chat() {
     async function sendMessage(e) {
         e.preventDefault();
         await axios.post(`${process.env.REACT_APP_API_BASE_URL}/chat`, { text: newMessage }, { headers: { Authorization: `Bearer ${token.token}` } });
+        socket.emit("newMessage");
         setNewMessage("");
         loadMessages();
     }
 
+    socket.on("loadMessages", loadMessages);
+
     async function loadMessages() {
-        const result = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/chat`, { headers: { Authorization: `Bearer ${token.token}` } });
-        setMessages(result.data);
+        axios.get(`${process.env.REACT_APP_API_BASE_URL}/chat`, { headers: { Authorization: `Bearer ${token.token}` } }).then(messages => setMessages(messages.data));
     }
 
     return (
@@ -38,11 +46,11 @@ export default function Chat() {
             <Container>
                 <ChatContainer>
                     <div> Espaço para conversar anonimamente sobre Pokémons!  </div>
-                    {messages.map(m => <ChatMessage key={m.id} message={m} />)}
                     <InputContainer onSubmit={sendMessage}>
                         <input type="text" placeholder="Digite aqui para enviar uma mensagem" value={newMessage} onChange={e => setNewMessage(e.target.value)} />
                         <button type="submit">Enviar</button>
                     </InputContainer>
+                    {messages.map(m => <ChatMessage key={m.id} message={m} />)}
                 </ChatContainer>
             </Container>
 
@@ -73,8 +81,6 @@ const ChatContainer = styled.div`
     box-shadow: 0px 0px 2px 2px rgba(0,0,0,0.2);
     border: 1px solid rgba(0,0,0,0.1);
     overflow-y: scroll;
-    padding-bottom: 30px;
-    position: relative;
     
     div:first-of-type{
         display: flex;
@@ -88,7 +94,6 @@ const ChatContainer = styled.div`
 const InputContainer = styled.form`
     width: 100%;
     height: 30px;
-    position: absolute;
     bottom: 0;
     left: 0;
 
